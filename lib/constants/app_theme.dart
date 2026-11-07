@@ -1,53 +1,87 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  // 1. Signature Nat Geo Jungle Green
+  static const Color natGeoGreen = Color(0xFF00A629);
+  static const Color darkGreen = Color(0xFF007A1E);
+
+  // 2. Nat Geo Iconic Yellow (Borders, Accents, Highlights)
   static const Color primaryYellow = Color(0xFFFFCC00);
-  static const Color accentGold = Color(0xFFD4A017);
-  static const Color background = Color(0xFF111613);
-  static const Color surfaceCard = Color(0xFF1C231F);
-  static const Color surfaceElevated = Color(0xFF26302B);
-  static const Color eraTriassic = Color(0xFFC86D3B);
-  static const Color eraJurassic = Color(0xFF2D7F5E);
+
+  // 3. Clean Light Expedition Canvas
+  static const Color background = Color(0xFFF7F9F6);
+  static const Color surfaceCard = Color(0xFFFFFFFF);
+  static const Color surfaceElevated = Color(0xFFEBF1EC);
+
+  // 4. Geological Era Badges
+  static const Color eraTriassic = Color(0xFFE67E22);
+  static const Color eraJurassic = Color(0xFF27AE60);
   static const Color eraCretaceous = Color(0xFFC0392B);
-  static const Color textLight = Color(0xFFF0EFEB);
-  static const Color textMuted = Color(0xFF9FA8A3);
-  static const Color borderSubtle = Color(0xFF2E3832);
+
+  // 5. Typography & Borders
+  static const Color textDark = Color(0xFF141A16);
+  static const Color textLight = Color(0xFFFFFFFF);
+  static const Color textMuted = Color(0xFF5A665E);
+  static const Color borderSubtle = Color(0xFFE0E5E1);
 }
 
 class AppTheme {
-  static ThemeData get darkTheme {
+  static ThemeData get natGeoTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryYellow,
-        secondary: AppColors.accentGold,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.natGeoGreen,
+        secondary: AppColors.primaryYellow,
         surface: AppColors.surfaceCard,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.background,
+        backgroundColor: AppColors.natGeoGreen,
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          color: AppColors.textLight,
+          color: Colors.white,
           fontSize: 20,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.1,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.2,
         ),
-        iconTheme: IconThemeData(color: AppColors.primaryYellow),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       cardTheme: CardThemeData(
-            color: AppColors.surfaceCard,
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: AppColors.borderSubtle, width: 1),
-            ),
+        color: AppColors.surfaceCard,
+        elevation: 1.5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.borderSubtle, width: 1),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.white,
+        indicatorColor: AppColors.primaryYellow,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.textDark,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            );
+          }
+          return const TextStyle(color: AppColors.textMuted, fontSize: 12);
+        }),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryYellow,
+          foregroundColor: AppColors.textDark,
+          textStyle: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.surfaceElevated,
-        contentTextStyle: const TextStyle(color: AppColors.textLight),
+        backgroundColor: AppColors.textDark,
+        contentTextStyle: const TextStyle(color: Colors.white),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         behavior: SnackBarBehavior.floating,
       ),
