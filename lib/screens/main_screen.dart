@@ -16,7 +16,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
+  // Daftar screen konstan
+  static const List<Widget> _screens = [
     HomeScreen(),
     CatalogScreen(),
     AtlasScreen(),
@@ -106,8 +107,12 @@ class _MainScreenState extends State<MainScreen> {
                   width: 1,
                   color: AppColors.borderSubtle,
                 ),
+                // IndexedStack menjaga performa tanpa rebuild ulang tiap tab dibuka
                 Expanded(
-                  child: _screens[_selectedIndex],
+                  child: IndexedStack(
+                    index: _selectedIndex,
+                    children: _screens,
+                  ),
                 ),
               ],
             ),
@@ -115,7 +120,10 @@ class _MainScreenState extends State<MainScreen> {
         }
 
         return Scaffold(
-          body: _screens[_selectedIndex],
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _screens,
+          ),
           bottomNavigationBar: NavigationBar(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (int index) {

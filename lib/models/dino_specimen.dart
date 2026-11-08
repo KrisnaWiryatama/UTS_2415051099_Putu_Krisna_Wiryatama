@@ -7,6 +7,7 @@ class DinoSpecimen {
   final String weight;
   final String description;
   final String discoveredIn;
+  final int likeCount;
 
   const DinoSpecimen({
     required this.id,
@@ -17,7 +18,32 @@ class DinoSpecimen {
     required this.weight,
     required this.description,
     required this.discoveredIn,
+    this.likeCount = 0,
   });
+
+  DinoSpecimen copyWith({
+    String? id,
+    String? name,
+    String? diet,
+    String? era,
+    String? length,
+    String? weight,
+    String? description,
+    String? discoveredIn,
+    int? likeCount,
+  }) {
+    return DinoSpecimen(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      diet: diet ?? this.diet,
+      era: era ?? this.era,
+      length: length ?? this.length,
+      weight: weight ?? this.weight,
+      description: description ?? this.description,
+      discoveredIn: discoveredIn ?? this.discoveredIn,
+      likeCount: likeCount ?? this.likeCount,
+    );
+  }
 
   factory DinoSpecimen.fromJson(Map<String, dynamic> json) {
     return DinoSpecimen(
@@ -29,6 +55,7 @@ class DinoSpecimen {
       weight: json['weight'] ?? '',
       description: json['description'] ?? '',
       discoveredIn: json['discoveredIn'] ?? '',
+      likeCount: json['like_count'] ?? json['likeCount'] ?? 0,
     );
   }
 
@@ -42,6 +69,7 @@ class DinoSpecimen {
       'weight': weight,
       'description': description,
       'discoveredIn': discoveredIn,
+      'like_count': likeCount,
     };
   }
 }

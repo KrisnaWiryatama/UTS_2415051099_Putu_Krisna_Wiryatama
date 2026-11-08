@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_theme.dart';
 import 'favorites_screen.dart';
 import 'dino_detail_screen.dart';
+import 'popular_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -107,7 +108,14 @@ class HomeScreen extends StatelessWidget {
                     cardBgColor: Colors.white,
                     textColor: AppColors.textDark,
                     isSelected: false,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PopularScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),

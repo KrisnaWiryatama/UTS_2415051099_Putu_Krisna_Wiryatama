@@ -1,159 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../constants/app_theme.dart';
 import '../models/dino_specimen.dart';
+import '../providers/dino_catalog_provider.dart';
 import 'dino_detail_screen.dart';
 
-class CatalogScreen extends StatefulWidget {
+class CatalogScreen extends StatelessWidget {
   const CatalogScreen({super.key});
 
   @override
-  State<CatalogScreen> createState() => _CatalogScreenState();
-}
-
-class _CatalogScreenState extends State<CatalogScreen> {
-  String _selectedDiet = 'Carnivora';
-  String _searchQuery = '';
-
-  // Data Spesimen Dinosaurus per Kategori Diet
-  final List<DinoSpecimen> _allSpecimens = const [
-    // --- CARNIVORA ---
-    DinoSpecimen(
-      id: 'c1',
-      name: 'Tyrannosaurus Rex',
-      diet: 'Carnivora',
-      era: 'Late Cretaceous (68 - 66 Mya)',
-      length: '12.3 meter',
-      weight: '8.4 ton',
-      description:
-          'Predator puncak dengan kekuatan gigitan terkuat di antara hewan darat yang pernah hidup. Memiliki indra penciuman sangat tajam.',
-      discoveredIn: 'Hell Creek Formation, Amerika Utara',
-    ),
-    DinoSpecimen(
-      id: 'c2',
-      name: 'Spinosaurus Aegyptiacus',
-      diet: 'Carnivora',
-      era: 'Late Cretaceous (99 - 93.5 Mya)',
-      length: '14 - 15 meter',
-      weight: '7.4 ton',
-      description:
-          'Dinosaurus theropoda terpanjang dengan layar punggung ikonik dan adaptasi semi-akuatik untuk berburu ikan raksasa.',
-      discoveredIn: 'Gurun Sahara, Mesir & Maroko',
-    ),
-    DinoSpecimen(
-      id: 'c3',
-      name: 'Velociraptor Mongoliensis',
-      diet: 'Carnivora',
-      era: 'Late Cretaceous (75 - 71 Mya)',
-      length: '2.0 meter',
-      weight: '15 - 18 kg',
-      description:
-          'Theropoda gesit berbulu dengan cakar melengkung sabit di kaki belakang untuk mencengkeram mangsa secara lincah.',
-      discoveredIn: 'Gurun Gobi, Mongolia',
-    ),
-    DinoSpecimen(
-      id: 'c4',
-      name: 'Allosaurus Fragilis',
-      diet: 'Carnivora',
-      era: 'Late Jurassic (155 - 145 Mya)',
-      length: '8.5 - 9.7 meter',
-      weight: '2.3 ton',
-      description:
-          'Predator dominan era Jurassic dengan tengkorak berengsel fleksibel dan tanduk kecil di atas matanya.',
-      discoveredIn: 'Morrison Formation, Amerika Serikat',
-    ),
-
-    // --- HERBIVORA ---
-    DinoSpecimen(
-      id: 'h1',
-      name: 'Brachiosaurus Altithorax',
-      diet: 'Herbivora',
-      era: 'Late Jurassic (154 - 153 Mya)',
-      length: '21 - 22 meter',
-      weight: '40 - 58 ton',
-      description:
-          'Sauropoda leher tegak dengan kaki depan lebih tinggi dari kaki belakang, memungkinkannya menjangkau tajuk pohon konifer tertinggi.',
-      discoveredIn: 'Colorado, Amerika Serikat',
-    ),
-    DinoSpecimen(
-      id: 'h2',
-      name: 'Triceratops Horridus',
-      diet: 'Herbivora',
-      era: 'Late Cretaceous (68 - 66 Mya)',
-      length: '8.0 - 9.0 meter',
-      weight: '6 - 12 ton',
-      description:
-          'Herbivora berkaki empat masif dengan tiga tanduk wajah tajam dan pelindung leher tulang padat untuk bertahan dari T-Rex.',
-      discoveredIn: 'Amerika Utara bagian Barat',
-    ),
-    DinoSpecimen(
-      id: 'h3',
-      name: 'Stegosaurus Stenops',
-      diet: 'Herbivora',
-      era: 'Late Jurassic (155 - 150 Mya)',
-      length: '9.0 meter',
-      weight: '4.5 - 5.0 ton',
-      description:
-          'Dinosaurus bertubuh gempal yang dilengkapi barisan lempeng tulang di punggung dan 4 duri ekor (thagomizer) mematikan.',
-      discoveredIn: 'Morrison Formation, Amerika Serikat',
-    ),
-    DinoSpecimen(
-      id: 'h4',
-      name: 'Ankylosaurus Magniventris',
-      diet: 'Herbivora',
-      era: 'Late Cretaceous (68 - 66 Mya)',
-      length: '8.0 meter',
-      weight: '6.0 ton',
-      description:
-          'Tank lapis baja prasejarah dengan punggung tebal berlapis osteoderm dan gada tulang keras di ujung ekor.',
-      discoveredIn: 'Montana & Alberta, Amerika Utara',
-    ),
-
-    // --- OMNIVORA ---
-    DinoSpecimen(
-      id: 'o1',
-      name: 'Oviraptor Philoceratops',
-      diet: 'Omnivora',
-      era: 'Late Cretaceous (75 Mya)',
-      length: '1.6 - 2.0 meter',
-      weight: '33 - 40 kg',
-      description:
-          'Dinosaurus berparuh kuat tanpa gigi yang mengerami sarang telurnya. Memakan tanaman, moluska, dan vertebrata kecil.',
-      discoveredIn: 'Djadokhta Formation, Mongolia',
-    ),
-    DinoSpecimen(
-      id: 'o2',
-      name: 'Gallimimus Bullatus',
-      diet: 'Omnivora',
-      era: 'Late Cretaceous (70 Mya)',
-      length: '6.0 meter',
-      weight: '440 - 500 kg',
-      description:
-          'Ornithomimosaurus mirip burung unta tercepat, memanfaatkan paruh lamela untuk memfilter tanaman air, biji, dan serangga.',
-      discoveredIn: 'Nemegt Basin, Mongolia',
-    ),
-    DinoSpecimen(
-      id: 'o3',
-      name: 'Therizinosaurus Cheloniformis',
-      diet: 'Omnivora',
-      era: 'Late Cretaceous (70 Mya)',
-      length: '10.0 meter',
-      weight: '5.0 ton',
-      description:
-          'Theropoda aneh bertubuh besar dengan cakar tangan terpanjang di dunia (mencapai 1 meter) untuk merengkuh ranting dahan tinggi.',
-      discoveredIn: 'Nemegt Formation, Mongolia',
-    ),
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    // Filter berdasarkan Kategori Diet yang dipilih dan Search Query
-    final filteredList = _allSpecimens.where((dino) {
-      final matchesDiet = dino.diet.toLowerCase() == _selectedDiet.toLowerCase();
-      final matchesSearch = dino.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          dino.era.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesDiet && matchesSearch;
-    }).toList();
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -178,14 +34,14 @@ class _CatalogScreenState extends State<CatalogScreen> {
                 ],
               ),
               child: TextField(
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
+                onChanged: (value) =>
+                    context.read<DinoCatalogProvider>().setSearchQuery(value),
                 decoration: const InputDecoration(
                   hintText: 'Cari nama spesimen atau era...',
-                  hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
+                  hintStyle: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 14,
+                  ),
                   prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 14),
@@ -194,37 +50,53 @@ class _CatalogScreenState extends State<CatalogScreen> {
             ),
           ),
 
-          // 2. Tiga Kategori Pilihan Pola Makan (Carnivora, Herbivora, Omnivora)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-            child: Row(
-              children: [
-                _buildDietTab(
-                  label: 'Carnivora',
-                  icon: Icons.pets,
-                  activeColor: AppColors.eraCretaceous,
+          // 2. Kategori Diet Tabs
+          Consumer<DinoCatalogProvider>(
+            builder: (context, provider, _) {
+              final selectedDiet = provider.selectedDiet;
+              return Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 6.0),
+                child: Row(
+                  children: [
+                    _buildDietTab(
+                      context,
+                      label: 'Carnivora',
+                      icon: Icons.pets,
+                      activeColor: AppColors.eraCretaceous,
+                      isSelected: selectedDiet == 'Carnivora',
+                    ),
+                    const SizedBox(width: 8),
+                    _buildDietTab(
+                      context,
+                      label: 'Herbivora',
+                      icon: Icons.grass,
+                      activeColor: AppColors.natGeoGreen,
+                      isSelected: selectedDiet == 'Herbivora',
+                    ),
+                    const SizedBox(width: 8),
+                    _buildDietTab(
+                      context,
+                      label: 'Omnivora',
+                      icon: Icons.lunch_dining,
+                      activeColor: const Color(0xFFE5A910),
+                      isSelected: selectedDiet == 'Omnivora',
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                _buildDietTab(
-                  label: 'Herbivora',
-                  icon: Icons.grass,
-                  activeColor: AppColors.natGeoGreen,
-                ),
-                const SizedBox(width: 8),
-                _buildDietTab(
-                  label: 'Omnivora',
-                  icon: Icons.lunch_dining,
-                  activeColor: const Color(0xFFE5A910),
-                ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(height: 6),
 
-          // 3. Grid / List Kartu Spesimen Dinosaurus
+          // 3. List Kartu Spesimen Reaktif
           Expanded(
-            child: filteredList.isEmpty
-                ? Center(
+            child: Consumer<DinoCatalogProvider>(
+              builder: (context, provider, _) {
+                final filteredList = provider.filteredSpecimens;
+
+                if (filteredList.isEmpty) {
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -234,49 +106,49 @@ class _CatalogScreenState extends State<CatalogScreen> {
                           color: AppColors.textMuted.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'Tidak ada spesimen "$_selectedDiet" ditemukan',
-                          style: const TextStyle(
+                        const Text(
+                          'Tidak ada spesimen ditemukan',
+                          style: TextStyle(
                             color: AppColors.textMuted,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-                    itemCount: filteredList.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final dino = filteredList[index];
-                      return _buildSpecimenCard(context, dino);
-                    },
-                  ),
+                  );
+                }
+
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+                  itemCount: filteredList.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final dino = filteredList[index];
+                    return _buildSpecimenCard(context, provider, dino);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  // Widget Pill Tombol Diet Tab
-  Widget _buildDietTab({
+  Widget _buildDietTab(
+    BuildContext context, {
     required String label,
     required IconData icon,
     required Color activeColor,
+    required bool isSelected,
   }) {
-    final bool isSelected = _selectedDiet == label;
-
     return Expanded(
       child: InkWell(
-        onTap: () {
-          setState(() {
-            _selectedDiet = label;
-          });
-        },
+        onTap: () => context.read<DinoCatalogProvider>().setDiet(label),
         borderRadius: BorderRadius.circular(24),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected ? activeColor : Colors.white,
@@ -319,8 +191,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  // Widget Kartu Spesimen
-  Widget _buildSpecimenCard(BuildContext context, DinoSpecimen dino) {
+  Widget _buildSpecimenCard(
+      BuildContext context, DinoCatalogProvider provider, DinoSpecimen dino) {
     Color badgeColor;
     if (dino.diet == 'Carnivora') {
       badgeColor = AppColors.eraCretaceous;
@@ -330,134 +202,357 @@ class _CatalogScreenState extends State<CatalogScreen> {
       badgeColor = const Color(0xFFE5A910);
     }
 
+    final bool isLiked = provider.isLiked(dino.id);
+    final bool isBookmarked = provider.isBookmarked(dino.id);
+    final int currentLikes = dino.likeCount;
+
     return Card(
-      elevation: 1,
+      elevation: 1.5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: const BorderSide(color: AppColors.borderSubtle),
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DinoDetailScreen(
-                dinoName: dino.name,
-                era: dino.era,
-                diet: dino.diet,
-              ),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Icon Thumbnail Box
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: badgeColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      dino.diet == 'Carnivora'
-                          ? Icons.pets
-                          : dino.diet == 'Herbivora'
-                              ? Icons.grass
-                              : Icons.lunch_dining,
-                      color: badgeColor,
-                      size: 26,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Konten Atas: Tap untuk buka Detail
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DinoDetailScreen(
+                      dinoName: dino.name,
+                      era: dino.era,
+                      diet: dino.diet,
                     ),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          dino.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textDark,
-                          ),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: badgeColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(height: 3),
+                        child: Icon(
+                          dino.diet == 'Carnivora'
+                              ? Icons.pets
+                              : dino.diet == 'Herbivora'
+                                  ? Icons.grass
+                                  : Icons.lunch_dining,
+                          color: badgeColor,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              dino.name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              dino.era,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert,
+                            color: AppColors.textMuted),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onSelected: (value) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              duration: const Duration(milliseconds: 1000),
+                              content:
+                                  Text('Menu $value dipilih untuk ${dino.name}'),
+                            ),
+                          );
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'Edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit,
+                                    size: 18, color: AppColors.natGeoGreen),
+                                SizedBox(width: 8),
+                                Text('Edit Spesimen'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'Hapus',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_outline,
+                                    size: 18, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text('Hapus Data'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    dino.description,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      color: AppColors.textDark,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.straighten,
+                              size: 14, color: AppColors.textMuted),
+                          const SizedBox(width: 4),
+                          Text(
+                            dino.length,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.scale,
+                              size: 14, color: AppColors.textMuted),
+                          const SizedBox(width: 4),
+                          Text(
+                            dino.weight,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.place,
+                              size: 13, color: AppColors.textMuted),
+                          const SizedBox(width: 3),
+                          Text(
+                            dino.discoveredIn,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 18, color: AppColors.borderSubtle),
+
+            // Baris Aksi Bawah: Langsung membaca state provider
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // 1. Tombol Logbook
+                InkWell(
+                  onTap: () {
+                    provider.toggleBookmark(dino.id);
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: isBookmarked
+                            ? const Color(0xFF616161)
+                            : AppColors.primaryYellow,
+                        duration: const Duration(milliseconds: 1200),
+                        content: Row(
+                          children: [
+                            Icon(
+                              isBookmarked
+                                  ? Icons.bookmark_remove_outlined
+                                  : Icons.bookmark_added,
+                              color: isBookmarked
+                                  ? Colors.white
+                                  : AppColors.textDark,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                isBookmarked
+                                    ? '${dino.name} dihapus dari Logbook'
+                                    : '${dino.name} disimpan ke Logbook',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isBookmarked
+                                      ? Colors.white
+                                      : AppColors.textDark,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isBookmarked
+                          ? AppColors.primaryYellow.withValues(alpha: 0.15)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isBookmarked
+                              ? Icons.bookmark
+                              : Icons.bookmark_outline,
+                          size: 20,
+                          color: isBookmarked
+                              ? AppColors.primaryYellow
+                              : AppColors.textMuted,
+                        ),
+                        const SizedBox(width: 4),
                         Text(
-                          dino.era,
-                          style: const TextStyle(
+                          isBookmarked ? 'Tersimpan' : 'Logbook',
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w600,
+                            color: isBookmarked
+                                ? AppColors.primaryYellow
+                                : AppColors.textMuted,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppColors.textMuted,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                dino.description,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12.5,
-                  color: AppColors.textDark,
-                  height: 1.35,
                 ),
-              ),
-              const Divider(height: 18, color: AppColors.borderSubtle),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.straighten, size: 14, color: AppColors.textMuted),
-                      const SizedBox(width: 4),
-                      Text(
-                        dino.length,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark,
+                const SizedBox(width: 10),
+
+                // 2. Tombol Suka / Like
+                InkWell(
+                  onTap: () {
+                    provider.toggleLike(dino.id);
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: isLiked
+                            ? const Color(0xFF555555)
+                            : const Color(0xFFE53935),
+                        duration: const Duration(milliseconds: 1200),
+                        content: Row(
+                          children: [
+                            Icon(
+                              isLiked ? Icons.favorite_border : Icons.favorite,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                isLiked
+                                    ? 'Batal menyukai ${dino.name}'
+                                    : 'Menyukai ${dino.name} (Masuk ke Popular)',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      const Icon(Icons.scale, size: 14, color: AppColors.textMuted),
-                      const SizedBox(width: 4),
-                      Text(
-                        dino.weight,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textDark,
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isLiked
+                          ? Colors.red.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isLiked ? Icons.favorite : Icons.favorite_border,
+                          size: 20,
+                          color: isLiked ? Colors.red : AppColors.textMuted,
                         ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    dino.discoveredIn,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.textMuted,
-                      fontStyle: FontStyle.italic,
+                        const SizedBox(width: 5),
+                        Text(
+                          '$currentLikes Suka',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isLiked ? Colors.red : AppColors.textDark,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
