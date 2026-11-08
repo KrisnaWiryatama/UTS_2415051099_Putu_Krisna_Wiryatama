@@ -18,4 +18,30 @@ class DinoSpecimen {
     required this.description,
     required this.discoveredIn,
   });
+
+  factory DinoSpecimen.fromJson(Map<String, dynamic> json) {
+    return DinoSpecimen(
+      id: json['id']?.toString() ?? '',
+      name: json['name'] ?? '',
+      diet: json['diet'] ?? 'Carnivora',
+      era: json['era'] ?? '',
+      length: json['length'] ?? '',
+      weight: json['weight'] ?? '',
+      description: json['description'] ?? '',
+      discoveredIn: json['discoveredIn'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'diet': diet,
+      'era': era,
+      'length': length,
+      'weight': weight,
+      'description': description,
+      'discoveredIn': discoveredIn,
+    };
+  }
 }
