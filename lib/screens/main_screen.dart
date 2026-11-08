@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../constants/app_theme.dart';
 import 'home_screen.dart';
 import 'catalog_screen.dart';
-import 'favorites_screen.dart';
+import 'atlas_screen.dart';
+import 'news_screen.dart';
 import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -18,7 +19,8 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     CatalogScreen(),
-    FavoritesScreen(),
+    AtlasScreen(),
+    NewsScreen(),
     ProfileScreen(),
   ];
 
@@ -26,7 +28,6 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Breakpoint 600dp membedakan mode Compact (HP) dan Wide (Tablet/Web)
         final bool isWide = constraints.maxWidth >= 600;
 
         if (isWide) {
@@ -84,9 +85,14 @@ class _MainScreenState extends State<MainScreen> {
                       label: Text('Catalog'),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.bookmark_outline),
-                      selectedIcon: Icon(Icons.bookmark, color: AppColors.natGeoGreen),
-                      label: Text('Logbook'),
+                      icon: Icon(Icons.public_outlined),
+                      selectedIcon: Icon(Icons.public, color: AppColors.natGeoGreen),
+                      label: Text('Atlas'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.newspaper_outlined),
+                      selectedIcon: Icon(Icons.newspaper, color: AppColors.natGeoGreen),
+                      label: Text('News'),
                     ),
                     NavigationRailDestination(
                       icon: Icon(Icons.person_outline),
@@ -108,7 +114,6 @@ class _MainScreenState extends State<MainScreen> {
           );
         }
 
-        // Tampilan Compact (Mobile)
         return Scaffold(
           body: _screens[_selectedIndex],
           bottomNavigationBar: NavigationBar(
@@ -132,9 +137,14 @@ class _MainScreenState extends State<MainScreen> {
                 label: 'Catalog',
               ),
               NavigationDestination(
-                icon: Icon(Icons.bookmark_outline),
-                selectedIcon: Icon(Icons.bookmark, color: AppColors.natGeoGreen),
-                label: 'Logbook',
+                icon: Icon(Icons.public_outlined),
+                selectedIcon: Icon(Icons.public, color: AppColors.natGeoGreen),
+                label: 'Atlas',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.newspaper_outlined),
+                selectedIcon: Icon(Icons.newspaper, color: AppColors.natGeoGreen),
+                label: 'News',
               ),
               NavigationDestination(
                 icon: Icon(Icons.person_outline),

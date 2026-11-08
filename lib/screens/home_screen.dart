@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_theme.dart';
+import 'favorites_screen.dart';
+import 'dino_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,143 +10,371 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('JURASSICA'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-        ],
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primaryYellow,
+                  width: 2.0,
+                ),
+              ),
+              child: const CircleAvatar(
+                radius: 16,
+                backgroundImage: AssetImage('assets/dinosaur_icon.jpg'),
+                backgroundColor: Colors.transparent,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text(
+              'JURASSICA',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Banner Ala Nat Geo Kids Dinosaurs
+            // Search Bar Full Width
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.natGeoGreen,
-                borderRadius: BorderRadius.circular(14),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.borderSubtle),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Aksen Garis Kuning Vertikal Khas Nat Geo
-                  Container(
-                    width: 5,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryYellow,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'DINOSAURS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Explore the incredible world of dinosaurs through fascinating facts, specimens, and field observations.',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                            height: 1.35,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              child: const TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search specimens, eras...',
+                  hintStyle:
+                      TextStyle(color: AppColors.textMuted, fontSize: 14),
+                  prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            // Kategori Pill Row (All Eras, Popular, Logbook)
             const Text(
-              'STATUS OBSERVASI LAPANGAN',
+              'Expeditions',
               style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
                 color: AppColors.textDark,
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.1,
               ),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: const [
-                          Icon(Icons.public, color: AppColors.natGeoGreen, size: 30),
-                          SizedBox(height: 8),
-                          Text(
-                            'Katalog Global',
-                            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'REST API',
-                            style: TextStyle(
-                              color: AppColors.textDark,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: _buildCategoryPill(
+                    icon: Icons.public,
+                    title: 'All Eras',
+                    iconBgColor: Colors.white,
+                    iconColor: AppColors.natGeoGreen,
+                    cardBgColor: AppColors.natGeoGreen,
+                    textColor: Colors.white,
+                    isSelected: true,
+                    onTap: () {},
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: const [
-                          Icon(Icons.bookmark, color: AppColors.primaryYellow, size: 30),
-                          SizedBox(height: 8),
-                          Text(
-                            'Koleksi Pribadi',
-                            style: TextStyle(color: AppColors.textMuted, fontSize: 12),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Supabase DB',
-                            style: TextStyle(
-                              color: AppColors.textDark,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: _buildCategoryPill(
+                    icon: Icons.whatshot,
+                    title: 'Popular',
+                    iconBgColor: const Color(0xFFFF9800).withValues(alpha: 0.15),
+                    iconColor: const Color(0xFFFF9800),
+                    cardBgColor: Colors.white,
+                    textColor: AppColors.textDark,
+                    isSelected: false,
+                    onTap: () {},
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildCategoryPill(
+                    icon: Icons.bookmark,
+                    title: 'Logbook',
+                    iconBgColor: AppColors.primaryYellow.withValues(alpha: 0.3),
+                    iconColor: AppColors.textDark,
+                    cardBgColor: Colors.white,
+                    textColor: AppColors.textDark,
+                    isSelected: false,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FavoritesScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+
+            // Section Kartu Dinosaurus Unggulan
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: const [
+                Text(
+                  'Featured Discovery',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                Text(
+                  'See All',
+                  style: TextStyle(
+                    color: AppColors.natGeoGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Horizontal Scroll Cards
+            SizedBox(
+              height: 260,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                children: [
+                  _buildFeaturedCard(
+                    context: context,
+                    cardColor: AppColors.natGeoGreen,
+                    specimenName: 'Spinosaurus Aegyptiacus',
+                    originEra: 'Cretaceous Period • North Africa',
+                    specimenCount: '12 Fossils',
+                    durationEstimate: '95 Mya',
+                    illustrationIcon: Icons.water,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DinoDetailScreen(
+                            dinoName: 'Spinosaurus Aegyptiacus',
+                            era: 'Late Cretaceous',
+                            diet: 'Piscivore / Carnivore',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 16),
+                  _buildFeaturedCard(
+                    context: context,
+                    cardColor: const Color(0xFFE5A910),
+                    specimenName: 'Tyrannosaurus Rex',
+                    originEra: 'Late Cretaceous • Laramidia',
+                    specimenCount: '30 Specimens',
+                    durationEstimate: '68 Mya',
+                    illustrationIcon: Icons.pets,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DinoDetailScreen(
+                            dinoName: 'Tyrannosaurus Rex',
+                            era: 'Late Cretaceous',
+                            diet: 'Carnivore',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryPill({
+    required IconData icon,
+    required String title,
+    required Color iconBgColor,
+    required Color iconColor,
+    required Color cardBgColor,
+    required Color textColor,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: cardBgColor,
+          borderRadius: BorderRadius.circular(30),
+          border: isSelected
+              ? null
+              : Border.all(color: AppColors.borderSubtle, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 16, color: iconColor),
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                title,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturedCard({
+    required BuildContext context,
+    required Color cardColor,
+    required String specimenName,
+    required String originEra,
+    required String specimenCount,
+    required String durationEstimate,
+    required IconData illustrationIcon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 210,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: cardColor.withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 100,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Icon(
+                  illustrationIcon,
+                  size: 48,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const Spacer(),
+            Text(
+              specimenName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              originEra,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 11,
+              ),
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                _buildStatBadge(Icons.description, specimenCount),
+                const SizedBox(width: 8),
+                _buildStatBadge(Icons.schedule, durationEstimate),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatBadge(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
