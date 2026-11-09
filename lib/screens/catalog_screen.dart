@@ -4,6 +4,7 @@ import '../constants/app_theme.dart';
 import '../models/dino_specimen.dart';
 import '../providers/dino_catalog_provider.dart';
 import 'dino_detail_screen.dart';
+import '../widgets/add_specimen_dialog.dart';
 
 class CatalogScreen extends StatelessWidget {
   const CatalogScreen({super.key});
@@ -19,34 +20,59 @@ class CatalogScreen extends StatelessWidget {
         children: [
           // 1. Search Box
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.borderSubtle),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                 // 1. Kotak Input Pencarian
+                Expanded(
+                   child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.borderSubtle),
+                    ),
+                    child: TextField(
+                      onChanged: (val) {
+                        context.read<DinoCatalogProvider>().setSearchQuery(val);
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Cari nama spesimen atau era...',
+                        hintStyle: TextStyle(fontSize: 13, color: AppColors.textMuted),
+                        prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-              child: TextField(
-                onChanged: (value) =>
-                    context.read<DinoCatalogProvider>().setSearchQuery(value),
-                decoration: const InputDecoration(
-                  hintText: 'Cari nama spesimen atau era...',
-                  hintStyle: TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 14,
-                  ),
-                  prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 14),
                 ),
-              ),
+                const SizedBox(width: 8),
+
+                // 2. Tombol Create Kuning Nat Geo
+                Material(
+                  color: AppColors.primaryYellow,
+                  borderRadius: BorderRadius.circular(12),
+                  elevation: 1,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => const AddSpecimenDialog(),
+                      );
+                    },
+                    child: Container(
+                      height: 48,
+                      width: 48,
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.add,
+                        color: AppColors.textDark,
+                        size: 26,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 

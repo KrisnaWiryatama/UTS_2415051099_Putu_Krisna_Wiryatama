@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../models/dino_specimen.dart';
+import '../repositories/dino_repository.dart';
 
 class DinoCatalogProvider extends ChangeNotifier {
+  final DinoRepository _repository = DinoRepository();
   // HAPUS 'const' agar list ini modifiable (bisa diubah indeksnya)
   List<DinoSpecimen> _specimens = [
     // --- CARNIVORA ---
@@ -253,5 +255,16 @@ class DinoCatalogProvider extends ChangeNotifier {
   void setError(String error) {
     _errorMessage = error;
     notifyListeners();
+  }
+
+  Future<void> addSpecimen(DinoSpecimen dino) async {
+    try {
+      await _repository.insertSpecimen(dino);
+      _specimens = await _repository.fetchSpecimens();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Gagal menambah spesimen: $e');
+      rethrow;
+    }
   }
 }
