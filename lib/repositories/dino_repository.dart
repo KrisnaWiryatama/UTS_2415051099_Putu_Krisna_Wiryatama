@@ -42,7 +42,20 @@ class DinoRepository {
     });
   }
 
-  // 3. Update Jumlah Suka
+  // 3. Perbarui Spesimen (UPDATE)
+  Future<void> updateSpecimen(DinoSpecimen dino) async {
+    await _client.from('specimens').update({
+      'name': dino.name,
+      'diet': dino.diet,
+      'era': dino.era,
+      'length': dino.length,
+      'weight': dino.weight,
+      'description': dino.description,
+      'discovered_in': dino.discoveredIn,
+    }).eq('id', dino.id);
+  }
+
+  // 4. Update Jumlah Suka
   Future<void> updateLikes(String id, int newLikes) async {
     await _client
         .from('specimens')

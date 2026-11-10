@@ -3,42 +3,84 @@ import 'package:provider/provider.dart';
 import '../constants/app_theme.dart';
 import '../models/dino_specimen.dart';
 import '../providers/dino_catalog_provider.dart';
-import 'dino_detail_screen.dart';
 import '../widgets/add_specimen_dialog.dart';
+import '../widgets/edit_specimen_dialog.dart';
+import '../widgets/report_feedback_dialog.dart';
+import 'dino_detail_screen.dart';
 
 class CatalogScreen extends StatelessWidget {
   const CatalogScreen({super.key});
 
+  // Warna diet lokal tanpa perlu mengedit app_theme.dart
+  static const Color carnivoreColor = Color(0xFFD32F2F);
+  static const Color herbivoreColor = Color(0xFF2E7D32);
+  static const Color omnivoreColor = Color(0xFF1976D2);
+
+  Color _getDietColor(String diet) {
+    switch (diet) {
+      case 'Carnivora':
+        return carnivoreColor;
+      case 'Herbivora':
+        return herbivoreColor;
+      case 'Omnivora':
+        return omnivoreColor;
+      default:
+        return AppColors.textDark;
+    }
+  }
+
+  IconData _getDietIcon(String diet) {
+    switch (diet) {
+      case 'Carnivora':
+        return Icons.pets;
+      case 'Herbivora':
+        return Icons.eco;
+      case 'Omnivora':
+        return Icons.lunch_dining;
+      default:
+        return Icons.category;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final catalogProvider = context.watch<DinoCatalogProvider>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('SPECIES ARCHIVE'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Segarkan Arsip',
+            onPressed: () => catalogProvider.loadDataFromSupabase(),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // 1. Search Box
+          // 1. Search Box & Tombol Kuning Create
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Row(
               children: [
-                 // 1. Kotak Input Pencarian
                 Expanded(
-                   child: Container(
+                  child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.borderSubtle),
                     ),
                     child: TextField(
-                      onChanged: (val) {
-                        context.read<DinoCatalogProvider>().setSearchQuery(val);
-                      },
+                      onChanged: (val) => catalogProvider.setSearchQuery(val),
                       decoration: const InputDecoration(
                         hintText: 'Cari nama spesimen atau era...',
-                        hintStyle: TextStyle(fontSize: 13, color: AppColors.textMuted),
-                        prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
+                        hintStyle: TextStyle(
+                            fontSize: 13, color: AppColors.textMuted),
+                        prefixIcon:
+                            Icon(Icons.search, color: AppColors.textMuted),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 12),
                       ),
@@ -46,8 +88,6 @@ class CatalogScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-
-                // 2. Tombol Create Kuning Nat Geo
                 Material(
                   color: AppColors.primaryYellow,
                   borderRadius: BorderRadius.circular(12),
@@ -76,119 +116,101 @@ class CatalogScreen extends StatelessWidget {
             ),
           ),
 
-          // 2. Kategori Diet Tabs
-          Consumer<DinoCatalogProvider>(
-            builder: (context, provider, _) {
-              final selectedDiet = provider.selectedDiet;
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 6.0),
-                child: Row(
-                  children: [
-                    _buildDietTab(
-                      context,
-                      label: 'Carnivora',
-                      icon: Icons.pets,
-                      activeColor: AppColors.eraCretaceous,
-                      isSelected: selectedDiet == 'Carnivora',
-                    ),
-                    const SizedBox(width: 8),
-                    _buildDietTab(
-                      context,
-                      label: 'Herbivora',
-                      icon: Icons.grass,
-                      activeColor: AppColors.natGeoGreen,
-                      isSelected: selectedDiet == 'Herbivora',
-                    ),
-                    const SizedBox(width: 8),
-                    _buildDietTab(
-                      context,
-                      label: 'Omnivora',
-                      icon: Icons.lunch_dining,
-                      activeColor: const Color(0xFFE5A910),
-                      isSelected: selectedDiet == 'Omnivora',
-                    ),
-                  ],
+          // 2. Filter Kategori Diet
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                _buildDietFilterChip(
+                  context,
+                  label: 'Carnivora',
+                  icon: Icons.pets,
+                  color: carnivoreColor,
+                  isSelected: catalogProvider.selectedDiet == 'Carnivora',
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: 6),
-
-          // 3. List Kartu Spesimen Reaktif
-          Expanded(
-            child: Consumer<DinoCatalogProvider>(
-              builder: (context, provider, _) {
-                final filteredList = provider.filteredSpecimens;
-
-                if (filteredList.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.travel_explore,
-                          size: 56,
-                          color: AppColors.textMuted.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Tidak ada spesimen ditemukan',
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-                  itemCount: filteredList.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final dino = filteredList[index];
-                    return _buildSpecimenCard(context, provider, dino);
-                  },
-                );
-              },
+                const SizedBox(width: 8),
+                _buildDietFilterChip(
+                  context,
+                  label: 'Herbivora',
+                  icon: Icons.eco,
+                  color: herbivoreColor,
+                  isSelected: catalogProvider.selectedDiet == 'Herbivora',
+                ),
+                const SizedBox(width: 8),
+                _buildDietFilterChip(
+                  context,
+                  label: 'Omnivora',
+                  icon: Icons.lunch_dining,
+                  color: omnivoreColor,
+                  isSelected: catalogProvider.selectedDiet == 'Omnivora',
+                ),
+              ],
             ),
+          ),
+          const SizedBox(height: 10),
+
+          // 3. Daftar Spesimen
+          Expanded(
+            child: catalogProvider.isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.natGeoGreen,
+                    ),
+                  )
+                : catalogProvider.filteredSpecimens.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Tidak ada spesimen yang cocok dengan pencarian.',
+                          style: TextStyle(color: AppColors.textMuted),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                        itemCount: catalogProvider.filteredSpecimens.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final dino =
+                              catalogProvider.filteredSpecimens[index];
+                          return _buildSpecimenCard(
+                              context, dino, catalogProvider);
+                        },
+                      ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDietTab(
+  Widget _buildDietFilterChip(
     BuildContext context, {
     required String label,
     required IconData icon,
-    required Color activeColor,
+    required Color color,
     required bool isSelected,
   }) {
+    final provider = context.read<DinoCatalogProvider>();
     return Expanded(
       child: InkWell(
-        onTap: () => context.read<DinoCatalogProvider>().setDiet(label),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          provider.setSelectedDiet(isSelected ? 'Semua' : label);
+        },
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? activeColor : Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            color: isSelected ? color : Colors.white,
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? activeColor : AppColors.borderSubtle,
-              width: 1.5,
+              color: isSelected ? color : AppColors.borderSubtle,
             ),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: activeColor.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : [],
@@ -198,16 +220,16 @@ class CatalogScreen extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 16,
-                color: isSelected ? Colors.white : AppColors.textMuted,
+                size: 15,
+                color: isSelected ? Colors.white : AppColors.textDark,
               ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.textDark,
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected ? Colors.white : AppColors.textDark,
                 ),
               ),
             ],
@@ -218,367 +240,306 @@ class CatalogScreen extends StatelessWidget {
   }
 
   Widget _buildSpecimenCard(
-      BuildContext context, DinoCatalogProvider provider, DinoSpecimen dino) {
-    Color badgeColor;
-    if (dino.diet == 'Carnivora') {
-      badgeColor = AppColors.eraCretaceous;
-    } else if (dino.diet == 'Herbivora') {
-      badgeColor = AppColors.natGeoGreen;
-    } else {
-      badgeColor = const Color(0xFFE5A910);
-    }
-
-    final bool isLiked = provider.isLiked(dino.id);
-    final bool isBookmarked = provider.isBookmarked(dino.id);
-    final int currentLikes = dino.likeCount;
+    BuildContext context,
+    DinoSpecimen dino,
+    DinoCatalogProvider provider,
+  ) {
+    final bool isMine = provider.isMySpecimen(dino.id);
+    final Color dietColor = _getDietColor(dino.diet);
+    final IconData dietIcon = _getDietIcon(dino.diet);
 
     return Card(
       elevation: 1.5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.borderSubtle),
+        side: BorderSide(
+          color: isMine
+              ? AppColors.primaryYellow.withValues(alpha: 0.8)
+              : AppColors.borderSubtle,
+          width: isMine ? 1.5 : 1.0,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Konten Atas: Tap untuk buka Detail
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DinoDetailScreen(
-                      dinoName: dino.name,
-                      era: dino.era,
-                      diet: dino.diet,
-                    ),
-                  ),
-                );
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Column(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DinoDetailScreen(
+                dinoName: dino.name,
+                era: dino.era,
+                diet: dino.diet,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: badgeColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          dino.diet == 'Carnivora'
-                              ? Icons.pets
-                              : dino.diet == 'Herbivora'
-                                  ? Icons.grass
-                                  : Icons.lunch_dining,
-                          color: badgeColor,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: dietColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(dietIcon, color: dietColor),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              dino.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textDark,
+                            Expanded(
+                              child: Text(
+                                dino.name,
+                                style: const TextStyle(
+                                  fontSize: 15.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textDark,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              dino.era,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textMuted,
+                            if (isMine)
+                              Container(
+                                margin: const EdgeInsets.only(right: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryYellow
+                                      .withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: AppColors.primaryYellow,
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'ARSIP SAYA',
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
                               ),
-                            ),
                           ],
                         ),
-                      ),
-                      PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert,
-                            color: AppColors.textMuted),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onSelected: (value) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              duration: const Duration(milliseconds: 1000),
-                              content:
-                                  Text('Menu $value dipilih untuk ${dino.name}'),
-                            ),
-                          );
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'Edit',
-                            child: Row(
-                              children: [
-                                Icon(Icons.edit,
-                                    size: 18, color: AppColors.natGeoGreen),
-                                SizedBox(width: 8),
-                                Text('Edit Spesimen'),
-                              ],
-                            ),
+                        const SizedBox(height: 2),
+                        Text(
+                          dino.era,
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            color: AppColors.textMuted,
                           ),
-                          const PopupMenuItem(
-                            value: 'Hapus',
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete_outline,
-                                    size: 18, color: Colors.red),
-                                SizedBox(width: 8),
-                                Text('Hapus Data'),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    dino.description,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      color: AppColors.textDark,
-                      height: 1.35,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 6,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.straighten,
-                              size: 14, color: AppColors.textMuted),
-                          const SizedBox(width: 4),
-                          Text(
-                            dino.length,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textDark,
+                  // Menu Titik Tiga Adaptif
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert,
+                        color: AppColors.textMuted, size: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              EditSpecimenDialog(specimen: dino),
+                        );
+                      } else if (value == 'feedback') {
+                        showDialog(
+                          context: context,
+                          builder: (context) => ReportFeedbackDialog(
+                            specimen: dino,
+                            type: 'feedback',
+                          ),
+                        );
+                      } else if (value == 'report') {
+                        showDialog(
+                          context: context,
+                          builder: (context) => ReportFeedbackDialog(
+                            specimen: dino,
+                            type: 'report',
+                          ),
+                        );
+                      }
+                    },
+                    itemBuilder: (context) {
+                      return [
+                        if (isMine)
+                          const PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit_outlined,
+                                    size: 18, color: AppColors.natGeoGreen),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Edit Spesimen',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.natGeoGreen,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.scale,
-                              size: 14, color: AppColors.textMuted),
-                          const SizedBox(width: 4),
-                          Text(
-                            dino.weight,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textDark,
-                            ),
+                        const PopupMenuItem(
+                          value: 'feedback',
+                          child: Row(
+                            children: [
+                              Icon(Icons.rate_review_outlined,
+                                  size: 18, color: AppColors.textDark),
+                              SizedBox(width: 8),
+                              Text('Beri Masukan',
+                                  style: TextStyle(fontSize: 13)),
+                            ],
                           ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.place,
-                              size: 13, color: AppColors.textMuted),
-                          const SizedBox(width: 3),
-                          Text(
-                            dino.discoveredIn,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textMuted,
-                              fontStyle: FontStyle.italic,
-                            ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'report',
+                          child: Row(
+                            children: [
+                              Icon(Icons.flag_outlined,
+                                  size: 18, color: Colors.orange),
+                              SizedBox(width: 8),
+                              Text('Laporkan Data',
+                                  style: TextStyle(fontSize: 13)),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ];
+                    },
                   ),
                 ],
               ),
-            ),
-            const Divider(height: 18, color: AppColors.borderSubtle),
-
-            // Baris Aksi Bawah: Langsung membaca state provider
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // 1. Tombol Logbook
-                InkWell(
-                  onTap: () {
-                    provider.toggleBookmark(dino.id);
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        backgroundColor: isBookmarked
-                            ? const Color(0xFF616161)
-                            : AppColors.primaryYellow,
-                        duration: const Duration(milliseconds: 1200),
-                        content: Row(
-                          children: [
-                            Icon(
-                              isBookmarked
-                                  ? Icons.bookmark_remove_outlined
-                                  : Icons.bookmark_added,
-                              color: isBookmarked
-                                  ? Colors.white
-                                  : AppColors.textDark,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                isBookmarked
-                                    ? '${dino.name} dihapus dari Logbook'
-                                    : '${dino.name} disimpan ke Logbook',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isBookmarked
-                                      ? Colors.white
-                                      : AppColors.textDark,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+              const SizedBox(height: 10),
+              Text(
+                dino.description,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  height: 1.4,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Icon(Icons.straighten,
+                      size: 13, color: AppColors.textMuted),
+                  const SizedBox(width: 4),
+                  Text(
+                    dino.length,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Icon(Icons.scale_outlined,
+                      size: 13, color: AppColors.textMuted),
+                  const SizedBox(width: 4),
+                  Text(
+                    dino.weight,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.location_on_outlined,
+                      size: 13, color: AppColors.textMuted),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      dino.discoveredIn,
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.textMuted,
                       ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: AppColors.borderSubtle),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: isBookmarked
-                          ? AppColors.primaryYellow.withValues(alpha: 0.15)
-                          : Colors.transparent,
+                      color: AppColors.surfaceElevated,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    child: const Row(
                       children: [
-                        Icon(
-                          isBookmarked
-                              ? Icons.bookmark
-                              : Icons.bookmark_outline,
-                          size: 20,
-                          color: isBookmarked
-                              ? AppColors.primaryYellow
-                              : AppColors.textMuted,
-                        ),
-                        const SizedBox(width: 4),
+                        Icon(Icons.bookmark_border,
+                            size: 14, color: AppColors.textDark),
+                        SizedBox(width: 4),
                         Text(
-                          isBookmarked ? 'Tersimpan' : 'Logbook',
+                          'Logbook',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w600,
-                            color: isBookmarked
-                                ? AppColors.primaryYellow
-                                : AppColors.textMuted,
+                            color: AppColors.textDark,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-
-                // 2. Tombol Suka / Like
-                InkWell(
-                  onTap: () {
-                    provider.toggleLike(dino.id);
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        backgroundColor: isLiked
-                            ? const Color(0xFF555555)
-                            : const Color(0xFFE53935),
-                        duration: const Duration(milliseconds: 1200),
-                        content: Row(
-                          children: [
-                            Icon(
-                              isLiked ? Icons.favorite_border : Icons.favorite,
-                              color: Colors.white,
-                              size: 20,
+                  const SizedBox(width: 8),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => provider.incrementLike(dino.id),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.favorite_border,
+                              size: 15, color: AppColors.textDark),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${dino.likeCount} Suka',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                isLiked
-                                    ? 'Batal menyukai ${dino.name}'
-                                    : 'Menyukai ${dino.name} (Masuk ke Popular)',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isLiked
-                          ? Colors.red.withValues(alpha: 0.1)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isLiked ? Icons.favorite : Icons.favorite_border,
-                          size: 20,
-                          color: isLiked ? Colors.red : AppColors.textMuted,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          '$currentLikes Suka',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: isLiked ? Colors.red : AppColors.textDark,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
