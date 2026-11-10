@@ -146,4 +146,17 @@ class DinoCatalogProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> deleteSpecimen(String id) async {
+    try {
+      await _repository.deleteSpecimen(id);
+      _specimens.removeWhere((d) => d.id == id);
+      _bookmarkedIds.remove(id);
+      _likedIds.remove(id);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Gagal menghapus spesimen: $e');
+      rethrow;
+    }
+  }
 }

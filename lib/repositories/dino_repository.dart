@@ -55,6 +55,10 @@ class DinoRepository {
     }).eq('id', dino.id);
   }
 
+  Future<void> deleteSpecimen(String id) async {
+    await _client.from('specimens').delete().eq('id', id);
+  }
+
   // 4. Update Jumlah Suka
   Future<void> updateLikes(String id, int newLikes) async {
     await _client
