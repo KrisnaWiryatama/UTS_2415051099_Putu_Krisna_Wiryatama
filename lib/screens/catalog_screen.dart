@@ -6,6 +6,7 @@ import '../providers/dino_catalog_provider.dart';
 import '../widgets/add_specimen_dialog.dart';
 import '../widgets/edit_specimen_dialog.dart';
 import '../widgets/report_feedback_dialog.dart';
+import '../widgets/state_feedback_widget.dart';
 import 'dino_detail_screen.dart';
 
 class CatalogScreen extends StatelessWidget {
@@ -111,7 +112,7 @@ class CatalogScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // 1. Search Bar & Tombol Tambah Kuning
+          // 1. Search Box & Tombol Tambah
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Row(
@@ -197,32 +198,65 @@ class CatalogScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // 3. Daftar Spesimen
+          // 3. Konten Daftar Spesimen (Loading, Error, Empty, dan Success State)
           Expanded(
-            child: catalogProvider.isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.natGeoGreen,
-                    ),
-                  )
-                : catalogProvider.filteredSpecimens.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'Tidak ada spesimen yang cocok dengan pencarian.',
-                          style: TextStyle(color: AppColors.textMuted),
+            child: Builder(
+              builder: (context) {
+                // A. Loading State
+                if (catalogProvider.isLoading) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(color: AppColors.natGeoGreen),
+                        SizedBox(height: 12),
+                        Text(
+                          'Menghubungkan ke server arsip...',
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: AppColors.textMuted,
+                          ),
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                        itemCount: catalogProvider.filteredSpecimens.length,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final dino = catalogProvider.filteredSpecimens[index];
-                          return _buildSpecimenCard(
-                              context, dino, catalogProvider);
-                        },
-                      ),
+                      ],
+                    ),
+                  );
+                }
+
+                // B. Error State (Kegagalan Query / Offline)
+                if (catalogProvider.errorMessage != null) {
+                  return StateFeedbackWidget.error(
+                    message: catalogProvider.errorMessage!,
+                    onRetry: () => catalogProvider.loadDataFromSupabase(),
+                  );
+                }
+
+                // C. Empty State (Pencarian / Filter Kosong)
+                if (catalogProvider.filteredSpecimens.isEmpty) {
+                  return StateFeedbackWidget.empty(
+                    message: catalogProvider.searchQuery.isNotEmpty
+                        ? 'Tidak ditemukan spesimen dengan kata kunci "${catalogProvider.searchQuery}" pada kategori ${catalogProvider.selectedDiet}.'
+                        : 'Belum ada data spesimen untuk kategori ${catalogProvider.selectedDiet}.',
+                    onReset: () {
+                      catalogProvider.setSearchQuery('');
+                      catalogProvider.setSelectedDiet('Semua');
+                    },
+                  );
+                }
+
+                // D. Success State (Render ListView)
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                  itemCount: catalogProvider.filteredSpecimens.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final dino = catalogProvider.filteredSpecimens[index];
+                    return _buildSpecimenCard(
+                        context, dino, catalogProvider);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -390,6 +424,7 @@ class CatalogScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // Menu Titik Tiga
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert,
                         color: AppColors.textMuted, size: 20),
@@ -555,11 +590,11 @@ class CatalogScreen extends StatelessWidget {
               const Divider(height: 1, color: AppColors.borderSubtle),
               const SizedBox(height: 8),
 
-              // Footer Card: Logbook (Bookmark) & Like Counter
+              // Footer Card
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Tombol Logbook Mandiri
+                  // Logbook
                   Material(
                     color: provider.isBookmarked(dino.id)
                         ? AppColors.natGeoGreen
@@ -616,7 +651,7 @@ class CatalogScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
 
-                  // Tombol Like Interaktif
+                  // Like Counter
                   Material(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
