@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/app_theme.dart';
+import '../constants/dino_images.dart';
 import '../models/dino_specimen.dart';
 import '../providers/dino_catalog_provider.dart';
 import '../widgets/add_specimen_dialog.dart';
@@ -26,19 +27,6 @@ class CatalogScreen extends StatelessWidget {
         return omnivoreColor;
       default:
         return AppColors.textDark;
-    }
-  }
-
-  IconData _getDietIcon(String diet) {
-    switch (diet) {
-      case 'Carnivora':
-        return Icons.pets;
-      case 'Herbivora':
-        return Icons.eco;
-      case 'Omnivora':
-        return Icons.lunch_dining;
-      default:
-        return Icons.category;
     }
   }
 
@@ -112,7 +100,7 @@ class CatalogScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // 1. Search Box & Tombol Tambah
+          // Search Box & Tombol Tambah Spesimen
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
             child: Row(
@@ -144,9 +132,11 @@ class CatalogScreen extends StatelessWidget {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => const AddSpecimenDialog(),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddSpecimenScreen(),
+                        ),
                       );
                     },
                     child: Container(
@@ -165,7 +155,7 @@ class CatalogScreen extends StatelessWidget {
             ),
           ),
 
-          // 2. Filter Kategori Diet
+          // Filter Kategori Diet
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
@@ -198,11 +188,10 @@ class CatalogScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
 
-          // 3. Konten Daftar Spesimen (Loading, Error, Empty, dan Success State)
+          // Konten Spesimen Responsif
           Expanded(
-            child: Builder(
-              builder: (context) {
-                // A. Loading State
+            child: LayoutBuilder(
+              builder: (context, constraints) {
                 if (catalogProvider.isLoading) {
                   return const Center(
                     child: Column(
@@ -222,7 +211,6 @@ class CatalogScreen extends StatelessWidget {
                   );
                 }
 
-                // B. Error State (Kegagalan Query / Offline)
                 if (catalogProvider.errorMessage != null) {
                   return StateFeedbackWidget.error(
                     message: catalogProvider.errorMessage!,
@@ -230,7 +218,6 @@ class CatalogScreen extends StatelessWidget {
                   );
                 }
 
-                // C. Empty State (Pencarian / Filter Kosong)
                 if (catalogProvider.filteredSpecimens.isEmpty) {
                   return StateFeedbackWidget.empty(
                     message: catalogProvider.searchQuery.isNotEmpty
@@ -243,16 +230,34 @@ class CatalogScreen extends StatelessWidget {
                   );
                 }
 
-                // D. Success State (Render ListView)
+                final specimens = catalogProvider.filteredSpecimens;
+                final bool isWide = constraints.maxWidth >= 600;
+
+                if (isWide) {
+                  return GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 14,
+                      childAspectRatio: 1.85,
+                    ),
+                    itemCount: specimens.length,
+                    itemBuilder: (context, index) {
+                      return _buildSpecimenCard(
+                          context, specimens[index], catalogProvider);
+                    },
+                  );
+                }
+
                 return ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                  itemCount: catalogProvider.filteredSpecimens.length,
+                  itemCount: specimens.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 12),
                   itemBuilder: (context, index) {
-                    final dino = catalogProvider.filteredSpecimens[index];
                     return _buildSpecimenCard(
-                        context, dino, catalogProvider);
+                        context, specimens[index], catalogProvider);
                   },
                 );
               },
@@ -325,9 +330,16 @@ class CatalogScreen extends StatelessWidget {
     DinoSpecimen dino,
     DinoCatalogProvider provider,
   ) {
-    final bool isMine = provider.isMySpecimen(dino.id);
+    final bool isDefaultSeed = [
+      'tyrannosaurus rex',
+      'spinosaurus aegyptiacus',
+      'velociraptor mongoliensis',
+      'triceratops horridus',
+      'brachiosaurus altithorax',
+    ].contains(dino.name.trim().toLowerCase());
+
+    final bool isMine = provider.isMySpecimen(dino.id) || !isDefaultSeed;
     final Color dietColor = _getDietColor(dino.diet);
-    final IconData dietIcon = _getDietIcon(dino.diet);
 
     return Card(
       elevation: 1.5,
@@ -347,30 +359,40 @@ class CatalogScreen extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => DinoDetailScreen(
+                dino: dino,
                 dinoName: dino.name,
                 era: dino.era,
                 diet: dino.diet,
+                description: dino.description,
+                length: dino.length,
+                weight: dino.weight,
+                discoveredIn: dino.discoveredIn,
+                likeCount: dino.likeCount,
               ),
             ),
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(14.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: dietColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: 78,
+                      height: 78,
+                      child: DinoImages.buildImage(
+                        imageSource: dino.imageUrl,
+                        dinoName: dino.name,
+                        diet: dino.diet,
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
                     ),
-                    child: Icon(dietIcon, color: dietColor),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -393,7 +415,7 @@ class CatalogScreen extends StatelessWidget {
                               Container(
                                 margin: const EdgeInsets.only(right: 4),
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 2),
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: AppColors.primaryYellow.withValues(alpha: 0.25),
                                   borderRadius: BorderRadius.circular(6),
@@ -405,7 +427,7 @@ class CatalogScreen extends StatelessWidget {
                                 child: const Text(
                                   'ARSIP SAYA',
                                   style: TextStyle(
-                                    fontSize: 9.5,
+                                    fontSize: 9,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.textDark,
                                   ),
@@ -413,7 +435,7 @@ class CatalogScreen extends StatelessWidget {
                               ),
                           ],
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 3),
                         Text(
                           dino.era,
                           style: const TextStyle(
@@ -421,10 +443,42 @@ class CatalogScreen extends StatelessWidget {
                             color: AppColors.textMuted,
                           ),
                         ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: dietColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                dino.diet,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: dietColor,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.straighten,
+                                size: 12, color: AppColors.textMuted),
+                            const SizedBox(width: 3),
+                            Text(
+                              dino.length,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textMuted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                  // Menu Titik Tiga
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert,
                         color: AppColors.textMuted, size: 20),
@@ -433,10 +487,12 @@ class CatalogScreen extends StatelessWidget {
                     ),
                     onSelected: (value) {
                       if (value == 'edit') {
-                        showDialog(
-                          context: context,
-                          builder: (context) =>
-                              EditSpecimenDialog(specimen: dino),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditSpecimenScreen(specimen: dino),
+                          ),
                         );
                       } else if (value == 'delete') {
                         _showDeleteConfirmation(context, dino);
@@ -527,74 +583,23 @@ class CatalogScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              // Deskripsi
               Text(
                 dino.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 12.5,
+                  fontSize: 12,
                   height: 1.4,
                   color: AppColors.textDark,
                 ),
               ),
               const SizedBox(height: 10),
-
-              // Dimensi
-              Row(
-                children: [
-                  const Icon(Icons.straighten, size: 13, color: AppColors.textMuted),
-                  const SizedBox(width: 4),
-                  Text(
-                    dino.length,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  const Icon(Icons.scale_outlined, size: 13, color: AppColors.textMuted),
-                  const SizedBox(width: 4),
-                  Text(
-                    dino.weight,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-
-              // Lokasi
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textMuted),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      dino.discoveredIn,
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        fontStyle: FontStyle.italic,
-                        color: AppColors.textMuted,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
               const Divider(height: 1, color: AppColors.borderSubtle),
               const SizedBox(height: 8),
 
-              // Footer Card
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Logbook
                   Material(
                     color: provider.isBookmarked(dino.id)
                         ? AppColors.natGeoGreen
@@ -628,7 +633,7 @@ class CatalogScreen extends StatelessWidget {
                               provider.isBookmarked(dino.id)
                                   ? Icons.bookmark
                                   : Icons.bookmark_border,
-                              size: 15,
+                              size: 14,
                               color: provider.isBookmarked(dino.id)
                                   ? Colors.white
                                   : AppColors.textDark,
@@ -637,7 +642,7 @@ class CatalogScreen extends StatelessWidget {
                             Text(
                               'Logbook',
                               style: TextStyle(
-                                fontSize: 11.5,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: provider.isBookmarked(dino.id)
                                     ? Colors.white
@@ -650,8 +655,6 @@ class CatalogScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-
-                  // Like Counter
                   Material(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(8),
@@ -685,7 +688,7 @@ class CatalogScreen extends StatelessWidget {
                               provider.isLiked(dino.id)
                                   ? Icons.favorite
                                   : Icons.favorite_border,
-                              size: 16,
+                              size: 15,
                               color: provider.isLiked(dino.id)
                                   ? Colors.red
                                   : AppColors.textDark,
@@ -694,7 +697,7 @@ class CatalogScreen extends StatelessWidget {
                             Text(
                               '${dino.likeCount} Suka',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
                                 color: provider.isLiked(dino.id)
                                     ? Colors.red.shade800

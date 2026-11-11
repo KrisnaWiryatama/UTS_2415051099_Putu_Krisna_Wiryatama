@@ -43,16 +43,20 @@ class DinoRepository {
   }
 
   // 3. Perbarui Spesimen (UPDATE)
-  Future<void> updateSpecimen(DinoSpecimen dino) async {
-    await _client.from('specimens').update({
-      'name': dino.name,
-      'diet': dino.diet,
-      'era': dino.era,
-      'length': dino.length,
-      'weight': dino.weight,
-      'description': dino.description,
-      'discovered_in': dino.discoveredIn,
-    }).eq('id', dino.id);
+  Future<void> updateSpecimen(DinoSpecimen specimen) async {
+    await _client
+        .from('specimens') // <-- Ganti sesuai nama tabel yang ada di get/fetchSpecimens
+        .update({
+          'name': specimen.name,
+          'era': specimen.era,
+          'diet': specimen.diet,
+          'discovered_in': specimen.discoveredIn,
+          'length': specimen.length,
+          'weight': specimen.weight,
+          'description': specimen.description,
+          'image_url': specimen.imageUrl,
+        })
+        .eq('id', specimen.id);
   }
 
   Future<void> deleteSpecimen(String id) async {

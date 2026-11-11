@@ -1,89 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  // 1. Signature Nat Geo Jungle Green
-  static const Color natGeoGreen = Color(0xFF00A629);
-  static const Color darkGreen = Color(0xFF007A1E);
+  // Brand Colors khas Nat Geo
+  static const Color natGeoGreen = Color(0xFF0F8A5F);
+  static const Color natGeoGreenDark = Color(0xFF0A5C3F);
+  static const Color primaryYellow = Color(0xFFFFD200);
 
-  // 2. Nat Geo Iconic Yellow (Borders, Accents, Highlights)
-  static const Color primaryYellow = Color(0xFFFFCC00);
+  // Background & Surface
+  static const Color background = Color(0xFFF7F9F8);
+  static const Color surface = Colors.white;
+  static const Color surfaceElevated = Color(0xFFEDF2E8);
+  static const Color surfaceCard = Colors.white;
 
-  // 3. Clean Light Expedition Canvas
-  static const Color background = Color(0xFFF7F9F6);
-  static const Color surfaceCard = Color(0xFFFFFFFF);
-  static const Color surfaceElevated = Color(0xFFEBF1EC);
+  // Text Colors
+  static const Color textDark = Color(0xFF1B2320);
+  static const Color textMuted = Color(0xFF6B7280);
+  static const Color textLight = Colors.white;
 
-  // 4. Geological Era Badges
-  static const Color eraTriassic = Color(0xFFE67E22);
-  static const Color eraJurassic = Color(0xFF27AE60);
-  static const Color eraCretaceous = Color(0xFFC0392B);
+  // Border & Divider
+  static const Color borderSubtle = Color(0xFFE5E7EB);
 
-  // 5. Typography & Borders
-  static const Color textDark = Color(0xFF141A16);
-  static const Color textLight = Color(0xFFFFFFFF);
-  static const Color textMuted = Color(0xFF5A665E);
-  static const Color borderSubtle = Color(0xFFE0E5E1);
+  // Era Geologis Tags
+  static const Color eraTriassic = Color(0xFFE65100);
+  static const Color eraJurassic = Color(0xFF1565C0);
+  static const Color eraCretaceous = Color(0xFF2E7D32);
 }
 
 class AppTheme {
-  static ThemeData get natGeoTheme {
+  static ThemeData get lightTheme {
+    final String headlineFamily = GoogleFonts.montserrat().fontFamily!;
+    final String bodyFamily = GoogleFonts.plusJakartaSans().fontFamily!;
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.background,
-      colorScheme: const ColorScheme.light(
+      fontFamily: bodyFamily,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: AppColors.natGeoGreen,
         primary: AppColors.natGeoGreen,
         secondary: AppColors.primaryYellow,
-        surface: AppColors.surfaceCard,
+        surface: AppColors.surface,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: AppColors.natGeoGreen,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
+          fontFamily: headlineFamily,
+          fontSize: 18,
           fontWeight: FontWeight.w900,
-          letterSpacing: 1.2,
-        ),
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      cardTheme: CardThemeData(
-        color: AppColors.surfaceCard,
-        elevation: 1.5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: AppColors.borderSubtle, width: 1),
+          letterSpacing: 1.4,
+          color: Colors.white,
         ),
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.white,
-        indicatorColor: AppColors.primaryYellow,
-        labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const TextStyle(
-              color: AppColors.textDark,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-            );
-          }
-          return const TextStyle(color: AppColors.textMuted, fontSize: 12);
-        }),
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryYellow,
-          foregroundColor: AppColors.textDark,
-          textStyle: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      textTheme: TextTheme(
+        // Judul Utama, Banner, & Nama Spesimen
+        displayLarge: TextStyle(
+          fontFamily: headlineFamily,
+          fontSize: 26,
+          fontWeight: FontWeight.w900,
+          color: AppColors.textDark,
+          letterSpacing: -0.2,
         ),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.textDark,
-        contentTextStyle: const TextStyle(color: Colors.white),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        behavior: SnackBarBehavior.floating,
+        titleLarge: TextStyle(
+          fontFamily: headlineFamily,
+          fontSize: 19,
+          fontWeight: FontWeight.w900,
+          color: AppColors.textDark,
+          letterSpacing: 0.2,
+        ),
+        titleMedium: TextStyle(
+          fontFamily: headlineFamily,
+          fontSize: 15.5,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textDark,
+        ),
+        // Deskripsi, Catatan Morfologi, & Fakta Fosil
+        bodyLarge: TextStyle(
+          fontFamily: bodyFamily,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textDark,
+          height: 1.45,
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: bodyFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textDark,
+          height: 1.4,
+        ),
+        bodySmall: TextStyle(
+          fontFamily: bodyFamily,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textMuted,
+        ),
+        // Badge Diet, Kategori, & Tombol
+        labelLarge: TextStyle(
+          fontFamily: headlineFamily,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.6,
+        ),
       ),
     );
   }

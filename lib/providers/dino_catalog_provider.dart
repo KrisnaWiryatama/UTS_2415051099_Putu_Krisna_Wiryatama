@@ -133,16 +133,19 @@ class DinoCatalogProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateSpecimen(DinoSpecimen updatedDino) async {
+  Future<void> updateSpecimen(DinoSpecimen updatedSpecimen) async {
     try {
-      await _repository.updateSpecimen(updatedDino);
-      final index = _specimens.indexWhere((d) => d.id == updatedDino.id);
+      // Panggil repository yang sudah memakai nama tabel yang benar
+      await _repository.updateSpecimen(updatedSpecimen);
+
+      final index = _specimens.indexWhere((s) => s.id == updatedSpecimen.id);
       if (index != -1) {
-        _specimens[index] = updatedDino;
-        notifyListeners();
+        _specimens[index] = updatedSpecimen;
       }
+
+      notifyListeners();
     } catch (e) {
-      debugPrint('Gagal mengupdate spesimen: $e');
+      debugPrint('Error updating specimen: $e');
       rethrow;
     }
   }

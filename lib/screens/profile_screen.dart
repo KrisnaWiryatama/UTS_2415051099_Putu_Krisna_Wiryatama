@@ -1,240 +1,372 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../constants/app_theme.dart';
+import '../providers/dino_catalog_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final catalogProvider = context.watch<DinoCatalogProvider>();
+    final specimens = catalogProvider.specimens;
+    final int totalSpecimens = specimens.length;
+
+    // Menghitung jumlah predator terdata dari katalog
+    final int totalCarnivores =
+        specimens.where((d) => d.diet.toLowerCase().contains('carnivor')).length;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('RESEARCHER STATION'),
+        title: const Text('PROFIL PENELITI'),
+        elevation: 0,
+        actions: [
+          IconButton(
+            tooltip: 'Pengaturan',
+            icon: const Icon(Icons.tune_rounded),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  backgroundColor: AppColors.natGeoGreenDark,
+                  content: Text('Menu konfigurasi ekspedisi tersedia di versi berikutnya.'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 20.0),
-        child: Column(
-          children: [
-            // 1. Kartu Utama Peneliti (Profile Card)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(22.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.borderSubtle),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Header Kartu Profil Peneliti
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.natGeoGreenDark, AppColors.natGeoGreen],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.natGeoGreenDark.withValues(alpha: 0.25),
+                      blurRadius: 12,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        Container(
+                          width: 68,
+                          height: 68,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.primaryYellow, width: 2.5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: ClipOval(
+                            child: Image.asset(
+                              'assets/Nyengir.jpg',
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.person_rounded,
+                                    size: 42,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primaryYellow,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.verified_rounded,
+                            size: 14,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Putu Krisna Wiryatama',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                          SizedBox(height: 3),
+                          Text(
+                            'Lead Paleontologist & Curator',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryYellow,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'NIM: 2415051099 • Undiksha',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // 2. Statistik Ekspedisi Lapangan
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMetricCard(
+                      title: 'Total Arsip',
+                      value: '$totalSpecimens',
+                      subtitle: 'Spesimen Fosil',
+                      icon: Icons.auto_stories_outlined,
+                      accentColor: AppColors.natGeoGreen,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricCard(
+                      title: 'Spesies Apex',
+                      value: '$totalCarnivores',
+                      subtitle: 'Theropoda & Carnivora',
+                      icon: Icons.flash_on_rounded,
+                      accentColor: const Color(0xFFE65100),
+                    ),
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  // Frame Foto Profil dengan Border Kuning Khas Nat Geo
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primaryYellow,
-                        width: 3.0,
+
+              const SizedBox(height: 20),
+
+              // 3. Status Penyimpanan Cloud (Tanpa Sebutan Database)
+              _buildSectionTitle('STATUS SISTEM EKSPEDISI'),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.borderSubtle),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.natGeoGreen.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.cloud_done_rounded,
+                        color: AppColors.natGeoGreen,
+                        size: 22,
                       ),
                     ),
-                    child: CircleAvatar(
-                      radius: 46,
-                      backgroundColor: AppColors.surfaceElevated,
-                      backgroundImage: const AssetImage('Nyengir.jpg'),
-                      child: ClipOval(
-                        child: Image.asset(
-                          'Nyengir.jpg',
-                          width: 92,
-                          height: 92,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.person,
-                            size: 48,
-                            color: AppColors.natGeoGreen,
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Penyimpanan Cloud Terhubung',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textDark,
+                            ),
                           ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Seluruh rekaman katalog & gambar terenkripsi dan tersimpan aman secara online.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 4. Preferensi & Akun
+              _buildSectionTitle('PREFERENSI & AKUN'),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.borderSubtle),
+                ),
+                child: Column(
+                  children: [
+                    _buildSettingsTile(
+                      icon: Icons.science_outlined,
+                      title: 'Metode Pengukuran Paleontologi',
+                      subtitle: 'Metrik Standar Internasional (M / Ton)',
+                      onTap: () {},
+                    ),
+                    const Divider(height: 1, indent: 56, color: AppColors.borderSubtle),
+                    _buildSettingsTile(
+                      icon: Icons.sync_rounded,
+                      title: 'Sinkronisasi Ulang Arsip',
+                      subtitle: 'Segarkan data katalog dari server',
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: AppColors.natGeoGreen,
+                            content: Text('Katalog otomatis tersinkronisasi.'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1, indent: 56, color: AppColors.borderSubtle),
+                    _buildSettingsTile(
+                      icon: Icons.shield_outlined,
+                      title: 'Lisensi & Hak Cipta Ilmiah',
+                      subtitle: 'National Geographic & Natural History Museum Archive',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 5. Info Versi
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.borderSubtle),
+                      ),
+                      child: const Text(
+                        'JURASSICA v1.0.0 (Release)',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textMuted,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Nama Lengkap Peneliti
-                  const Text(
-                    'Putu Krisna Wiryatama',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.textDark,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-
-                  // Badge NIM & Kelas
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.natGeoGreen.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'NIM: 2415051099 • PTI 5B',
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Mesozoic Encyclopedia & Geological Field Journal',
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.natGeoGreen,
+                        fontSize: 10,
+                        color: AppColors.textMuted,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Institusi
-                  const Text(
-                    'Pendidikan Teknik Informatika • FTK\nUniversitas Pendidikan Ganesha',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textMuted,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-
-            // 2. Ringkasan Aktivitas Lapangan (Expedition Metrics)
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMetricTile(
-                    label: 'Status Ekspedisi',
-                    value: 'Active',
-                    icon: Icons.verified,
-                    accentColor: AppColors.natGeoGreen,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildMetricTile(
-                    label: 'Database Sync',
-                    value: 'Supabase',
-                    icon: Icons.cloud_done,
-                    accentColor: const Color(0xFFE5A910),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-
-            // 3. Section Informasi Proyek & Sistem
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Sistem & Observasi',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                  color: AppColors.textDark,
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.borderSubtle),
-              ),
-              child: Column(
-                children: [
-                  _buildSettingItem(
-                    icon: Icons.science_outlined,
-                    title: 'Fokus Riset',
-                    subtitle: 'Software Engineering & Mobile Exploration',
-                  ),
-                  const Divider(height: 1, indent: 56, color: AppColors.borderSubtle),
-                  _buildSettingItem(
-                    icon: Icons.storage_outlined,
-                    title: 'Arsitektur Data',
-                    subtitle: 'REST API Catalog & Supabase Logbook',
-                  ),
-                  const Divider(height: 1, indent: 56, color: AppColors.borderSubtle),
-                  _buildSettingItem(
-                    icon: Icons.devices_outlined,
-                    title: 'Platform Target',
-                    subtitle: 'Adaptive Layout (Web, Tablet & Mobile)',
-                  ),
-                  const Divider(height: 1, indent: 56, color: AppColors.borderSubtle),
-                  _buildSettingItem(
-                    icon: Icons.info_outline,
-                    title: 'Aplikasi',
-                    subtitle: 'Jurassica Nat Geo Kids v1.0.0',
-                  ),
-                ],
-              ),
-            ),
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Widget Pembantu: Metric Box
-  Widget _buildMetricTile({
-    required String label,
+  Widget _buildMetricCard({
+    required String title,
     required String value,
+    required String subtitle,
     required IconData icon,
     required Color accentColor,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderSubtle),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 20, color: accentColor),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textMuted,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Icon(icon, size: 20, color: accentColor),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w900,
+              color: accentColor,
+              height: 1.0,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textDark,
             ),
           ),
         ],
@@ -242,41 +374,53 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Widget Pembantu: List Tile Item
-  Widget _buildSettingItem({
+  Widget _buildSettingsTile({
     required IconData icon,
     required String title,
     required String subtitle,
+    required VoidCallback onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 22, color: AppColors.natGeoGreen),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: AppColors.natGeoGreen, size: 20),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textDark,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: const TextStyle(
+          fontSize: 11,
+          color: AppColors.textMuted,
+        ),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        size: 20,
+        color: AppColors.textMuted,
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w900,
+        color: AppColors.natGeoGreen,
+        letterSpacing: 0.8,
       ),
     );
   }

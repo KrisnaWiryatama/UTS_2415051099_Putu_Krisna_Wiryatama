@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/app_theme.dart';
+import '../constants/dino_images.dart';
 import '../models/dino_specimen.dart';
 import '../providers/dino_catalog_provider.dart';
 import 'dino_detail_screen.dart';
@@ -105,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Banner Sapaan Personal
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 16),
@@ -166,11 +168,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Seksi Expeditions
                   const Text(
                     'Expeditions',
                     style: TextStyle(
@@ -180,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
+
                   Row(
                     children: [
                       Expanded(
@@ -239,6 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 22),
+
+                  // Seksi Featured Discovery
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -268,6 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 4),
+
                   catalogProvider.isLoading
                       ? const Center(
                           child: Padding(
@@ -288,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             )
                           : SizedBox(
-                              height: 250,
+                              height: 290,
                               child: ListView.separated(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: popularList.length > 5
@@ -298,17 +306,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                     const SizedBox(width: 14),
                                 itemBuilder: (context, index) {
                                   final dino = popularList[index];
-                                  final isGreen = index % 2 == 0;
                                   return _buildFullFeaturedCard(
                                     context,
                                     dino: dino,
-                                    isGreen: isGreen,
                                     cardWidth: screenWidth - 44,
                                   );
                                 },
                               ),
                             ),
                   const SizedBox(height: 24),
+
+                  // Seksi Fakta Menarik Purba
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -336,6 +344,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
+
                   _buildFaktaCard(_faktaMenarik[_currentFactIndex]),
                 ],
               ),
@@ -415,153 +424,204 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildFullFeaturedCard(
     BuildContext context, {
     required DinoSpecimen dino,
-    required bool isGreen,
     required double cardWidth,
   }) {
-    final bgColor = isGreen ? AppColors.natGeoGreen : AppColors.primaryYellow;
-    final contentColor = isGreen ? Colors.white : AppColors.textDark;
+    final assetPath =
+        DinoImages.getAssetPath(dino.name, diet: dino.diet);
 
     return Container(
       width: cardWidth,
       decoration: BoxDecoration(
-        color: bgColor,
+        color: AppColors.natGeoGreenDark,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: bgColor.withValues(alpha: 0.35),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 12,
             offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(22),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DinoDetailScreen(
-                  dinoName: dino.name,
-                  era: dino.era,
-                  diet: dino.diet,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Gambar Asli Dino dari folder Assets
+            Image.asset(
+              assetPath,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: AppColors.natGeoGreen,
+                child: const Center(
+                  child: Icon(Icons.pets, size: 64, color: Colors.white24),
                 ),
               ),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        dino.diet.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: contentColor,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.favorite, size: 12, color: contentColor),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${dino.likeCount} Suka',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.bold,
-                              color: contentColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            dino.name,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: contentColor,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            '${dino.era} • ${dino.discoveredIn}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: contentColor.withValues(alpha: 0.85),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            dino.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              height: 1.35,
-                              color: contentColor.withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.25),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        dino.diet == 'Carnivora'
-                            ? Icons.pets
-                            : dino.diet == 'Herbivora'
-                                ? Icons.eco
-                                : Icons.lunch_dining,
-                        size: 28,
-                        color: contentColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ),
-          ),
+
+            // Lapisan Gradien Gelap Nat Geo
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.25),
+                    Colors.black.withValues(alpha: 0.0),
+                    Colors.black.withValues(alpha: 0.75),
+                    Colors.black.withValues(alpha: 0.95),
+                  ],
+                  stops: const [0.0, 0.35, 0.68, 1.0],
+                ),
+              ),
+            ),
+
+            // Konten Teks & Badge
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DinoDetailScreen(
+                        dinoName: dino.name,
+                        era: dino.era,
+                        diet: dino.diet,
+                      ),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryYellow,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              dino.diet.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.textDark,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.55),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.favorite,
+                                    size: 13, color: Colors.redAccent),
+                                const SizedBox(width: 5),
+                                Text(
+                                  '${dino.likeCount} Suka',
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  dino.name,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.history_toggle_off,
+                                        size: 13, color: AppColors.primaryYellow),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        '${dino.era} • ${dino.discoveredIn}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  dino.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    height: 1.35,
+                                    color: Colors.white.withValues(alpha: 0.88),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.natGeoGreen.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
